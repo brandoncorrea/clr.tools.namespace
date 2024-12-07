@@ -46,7 +46,7 @@
     (-> tracker
         (update-in [::files] #(if % (apply disj % deleted) #{}))
         (file/remove-files deleted)
-        (update-in [::files] into modified)
+        (update-in [::files] file/into-files modified)
         (file/add-files modified read-opts)
         (assoc ::time now))))
 

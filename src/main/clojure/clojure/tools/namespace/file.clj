@@ -87,6 +87,9 @@
 (defn some-file [coll file]
   (some #(files= file %) coll))
 
+(defn into-files [files others]
+  (into files (remove #(some-file files %) others)))
+
 (defn- dissoc-files [m files]
   (when m
     (select-keys m (remove #(some-file files %) (keys m)))))
