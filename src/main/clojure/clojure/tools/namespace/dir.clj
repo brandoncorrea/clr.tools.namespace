@@ -39,7 +39,7 @@
   (filter #(< (::time tracker 0) (milliseconds-since-epoch (.-LastWriteTimeUtc ^FileSystemInfo %))) files))         ;;; (.lastModified ^File %)
 
 (defn- deleted-files [tracker files]
-  (set/difference (::files tracker #{}) (set files)))
+  (set (remove #(file/some-file files %) (::files tracker #{}))))
 
 (defn- update-files [tracker deleted modified {:keys [read-opts]}]
   (let [now (milliseconds-since-epoch DateTime/UtcNow)]                                             ;;; (System/currentTimeMillis)

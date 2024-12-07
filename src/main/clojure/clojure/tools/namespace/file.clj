@@ -109,5 +109,10 @@
   (not= (enum-and (.Attributes file) System.IO.FileAttributes/Directory) System.IO.FileAttributes/Directory))
   
 (defn is-directory? [^System.IO.FileSystemInfo file]
-  (= (enum-and (.Attributes file) System.IO.FileAttributes/Directory) System.IO.FileAttributes/Directory))  
-  
+  (= (enum-and (.Attributes file) System.IO.FileAttributes/Directory) System.IO.FileAttributes/Directory))
+
+(defn files= [file-1 file-2]
+  (= (.-FullName file-1) (.-FullName file-2)))
+
+(defn some-file [coll file]
+  (some #(files= file %) coll))
