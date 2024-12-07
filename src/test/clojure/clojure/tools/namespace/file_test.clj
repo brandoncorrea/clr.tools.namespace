@@ -45,6 +45,18 @@
        (is (= (list 'example.main) (::track/unload tracker)))
        (is (= (list 'example.main) (::track/load tracker)))))
 
+(deftest t-add-file-that-already-exists-in-the-same-call
+  (let [dir        (help/create-temp-dir "t-add-file-that-already-exists-in-the-same-call")
+        file-ref-1 (help/create-source dir 'example.main :clj)
+        file-ref-2 (FileInfo. (.-FullName file-ref-1))
+        tracker    (-> (track/tracker)
+                       (file/add-files [file-ref-1 file-ref-2]))]
+    (is (= {} (:dependencies (::track/deps tracker))))
+    (is (= {} (:dependents (::track/deps tracker))))
+    (is (= {file-ref-2 'example.main} (::file/filemap tracker)))
+    (is (= (list 'example.main) (::track/unload tracker)))
+    (is (= (list 'example.main) (::track/load tracker)))))
+
 (deftest t-remove-no-files-from-empty-tracker
   (let [tracker (file/remove-files {} nil)]
     (is (= (dep/->MapDependencyGraph {} {}) (::track/deps tracker)))

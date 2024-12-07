@@ -70,22 +70,11 @@
 
 ;;; Dependency tracker
 
-(defn- files-and-deps [files read-opts]
-  (reduce (fn [m file]
-            (if-let [decl (read-file-ns-decl file read-opts)]
-              (let [deps (parse/deps-from-ns-decl decl)
-                    name (parse/name-from-ns-decl decl)]
-                (-> m
-                    (assoc-in [:depmap name] deps)
-                    (assoc-in [:filemap file] name)))
-              m))
-          {} files))
-
 (defn- files= [file-1 file-2]
   (= (.-FullName file-1) (.-FullName file-2)))
 
 (defn some-file [coll file]
-  (some #(files= file %) coll))
+  (reduce #(when (files= file %2) (reduced %2)) nil coll))
 
 (defn into-files [files others]
   (into files (remove #(some-file files %) others)))
@@ -103,6 +92,21 @@
 
 (defn- merge-file-map [m other]
   (merge (dissoc-files m (keys other)) other))
+
+(defn- distinct-files [files]
+  (reduce #(-> (disj %1 (some-file %1 %2))
+               (conj %2)) #{} files))
+
+(defn- files-and-deps [files read-opts]
+  (reduce (fn [m file]
+            (if-let [decl (read-file-ns-decl file read-opts)]
+              (let [deps (parse/deps-from-ns-decl decl)
+                    name (parse/name-from-ns-decl decl)]
+                (-> m
+                    (assoc-in [:depmap name] deps)
+                    (assoc-in [:filemap file] name)))
+              m))
+          {} (distinct-files files)))
 
 (def ^:private merge-map (fnil merge-file-map {}))
 
