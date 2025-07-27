@@ -18,7 +18,7 @@
             [clojure.set :as set]
             [clojure.string :as string])
   (:import (System.IO DirectoryInfo FileSystemInfo Path) (System.Text.RegularExpressions Regex)))    ;;; (java.io File) (java.util.regex Pattern)
-  
+
 (declare make-dir-info)
 
 (defn- find-files [dirs platform]
@@ -29,9 +29,15 @@
        (mapcat #(find/find-sources-in-dir % platform))
        ))                                          ;;; ditto:  (map #(.getCanonicalFile ^File %))
 
+(defn- milliseconds-since-epoch [^DateTime time]
+  (long
+    (/ (- (.-Ticks time)
+          (.-Ticks DateTime/UnixEpoch))
+       TimeSpan/TicksPerMillisecond)))
+
 (defn- modified-since-tracked? [tracker file]
   (if-let [time (::time tracker)]
-    (DateTime/op_LessThan time (.LastWriteTimeUtc ^FileSystemInfo file))
+    (< time (milliseconds-since-epoch (.LastWriteTimeUtc ^FileSystemInfo file)))
     true))
 
 (defn- modified-files [tracker files]
